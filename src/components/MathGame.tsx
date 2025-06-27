@@ -38,7 +38,7 @@ const MathGame = () => {
       if (nextQuestion < mathQuestions.length) {
         setTimeout(() => {
           setShowQuestion(true);
-        }, 500);
+        }, 1500); // Increased delay to show destruction effect
       }
     } else {
       console.log('Resposta errada - reiniciando jogo');

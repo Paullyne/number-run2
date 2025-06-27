@@ -7,33 +7,52 @@ import { mathQuestions } from '../data/questions';
 
 const MathGame = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [showQuestion, setShowQuestion] = useState(false);
+  const [showQuestion, setShowQuestion] = useState(true); // Mostrar a primeira pergunta imediatamente
   const [gameState, setGameState] = useState('playing'); // 'playing', 'dead', 'victory'
   const [playerPosition, setPlayerPosition] = useState(0);
 
   useEffect(() => {
-    if (playerPosition === currentQuestion + 1 && currentQuestion < mathQuestions.length) {
-      setShowQuestion(true);
-    } else if (currentQuestion === mathQuestions.length) {
+    console.log('Estado atual:', { currentQuestion, playerPosition, showQuestion, gameState });
+    
+    // Verificar se chegou ao final do jogo
+    if (currentQuestion >= mathQuestions.length) {
       setGameState('victory');
+      return;
     }
-  }, [playerPosition, currentQuestion]);
+
+    // Mostrar pergunta quando o jogador está na posição da pergunta atual
+    if (playerPosition === currentQuestion && !showQuestion && gameState === 'playing') {
+      setShowQuestion(true);
+    }
+  }, [playerPosition, currentQuestion, showQuestion, gameState]);
 
   const handleAnswer = (selectedAnswer: number) => {
     const correct = mathQuestions[currentQuestion].correct;
+    console.log('Resposta selecionada:', selectedAnswer, 'Correta:', correct);
     
     if (selectedAnswer === correct) {
       setShowQuestion(false);
-      setCurrentQuestion(prev => prev + 1);
-      setPlayerPosition(prev => prev + 1);
+      const nextQuestion = currentQuestion + 1;
+      const nextPosition = playerPosition + 1;
+      
+      setCurrentQuestion(nextQuestion);
+      setPlayerPosition(nextPosition);
+      
+      // Se ainda há perguntas, mostrar a próxima após um pequeno delay
+      if (nextQuestion < mathQuestions.length) {
+        setTimeout(() => {
+          setShowQuestion(true);
+        }, 500);
+      }
     } else {
+      console.log('Resposta errada - reiniciando jogo');
       setGameState('dead');
       setTimeout(() => {
         // Reset game
         setCurrentQuestion(0);
         setPlayerPosition(0);
         setGameState('playing');
-        setShowQuestion(false);
+        setShowQuestion(true); // Mostrar a primeira pergunta novamente
       }, 2000);
     }
   };
@@ -42,7 +61,7 @@ const MathGame = () => {
     setCurrentQuestion(0);
     setPlayerPosition(0);
     setGameState('playing');
-    setShowQuestion(false);
+    setShowQuestion(true); // Mostrar a primeira pergunta
   };
 
   if (gameState === 'victory') {
@@ -57,7 +76,7 @@ const MathGame = () => {
         gameState={gameState}
       />
       
-      {showQuestion && (
+      {showQuestion && currentQuestion < mathQuestions.length && (
         <QuestionModal
           question={mathQuestions[currentQuestion]}
           onAnswer={handleAnswer}
